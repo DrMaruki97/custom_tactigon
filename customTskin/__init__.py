@@ -1,7 +1,7 @@
 import time
 
 from multiprocessing import Pipe
-from tactigon_gear import Ble, TSkinConfig, Hand, OneFingerGesture
+from tactigon_gear import Ble, TSkinConfig, Hand, OneFingerGesture, TwoFingerGesture
 from typing import Optional
 
 from .middleware import ITSGesture

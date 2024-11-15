@@ -3,28 +3,33 @@ from math import sqrt
 import wave
 from multiprocessing import Process, Event
 from multiprocessing.connection import _ConnectionBase
-import csv
+import pandas as pd
 
 class Tester():
     def __init__(self) -> None:
-        self.data = {'ax':[],
-                     'ay':[],
-                     'az':[],
-                     'reg':[]}
-        self.regis = 1
+        self.x = []
+        self.y = []
+        self.z = []
+        self.gx = []
+        self.gy = []
+        self.gz = []
+        self.label = []
+        self.movimento = 'up'
 
-    def new_data(self,accX,accY,accZ,reg):
-        self.data['ax'].append(accX)
-        self.data['ay'].append(accY)
-        self.data['az'].append(accZ)
-        self.data['reg'].append(reg)
+    def new_data(self,accX,accY,accZ,gyroX,gyroY,gyroZ,movimento):
+        self.x.append(accX)
+        self.y.append(accY)
+        self.z.append(accZ)
+        self.gx.append(gyroX)
+        self.gy.append(gyroY)
+        self.gz.append(gyroZ)
+        self.label.append(movimento)
 
     def scrivi(self):
-        with open(r'C:\Users\LucaGiovagnoli\OneDrive - ITS Angelo Rizzoli\Desktop\Materiali\UFS15\Esercizi\tactigon_pw\testing.csv','a') as file:
-            writer = csv.DictWriter(file,fieldnames=self.data.keys())
-            writer.writeheader()
-            for row in zip(*self.data.values()):
-                writer.writerow(dict(zip(self.data.keys(),row)))
+        df = pd.DataFrame({'ax':self.x,'ay':self.y,'az':self.z,'gx':self.gx,'gy':self.gy,'gz':self.gz,'label':self.label})
+        df.to_csv(f'C:\\Users\\LucaGiovagnoli\\OneDrive - ITS Angelo Rizzoli\\Desktop\\Materiali\\UFS15\\Esercizi\\tactigon_pw\\testing.csv')
+        
+
         
 
 
@@ -42,6 +47,13 @@ class ITSGesture(Process):
         self.can_run = Event()
         self.registratore = Tester()
         self.registro = Event()
+        self.down = Event()
+        self.right = Event()
+        self.left = Event()
+        self.forward = Event()
+        self.backward = Event()
+        self.scrivi = Event()
+        
         
     
     
@@ -62,52 +74,34 @@ class ITSGesture(Process):
             return 'gira'
         else:
             return 'non gira'
+
+    def run(self):        
         
-    def fine_reg(self):
-        self.registratore.regis += 1
-
-
-    def reg(self):
-        if self.registro:
-            self.registro = False
-        else:
-            self.registro = True
-
-
-    def run(self):
-        l0 = None
-        velx,vely,velz=0,0,0
-        
-        #angolox0, angoloy0, angoloz0 = None
         while self.can_run.is_set():
+
             if self.sensor_rx.poll(timeout=0.02):
+
                 accX, accY, accZ, gyroX, gyroY, gyroZ = self.sensor_rx.recv()
-                if self.registro.is_set():
-                    self.registratore.new_data(accX,accY,accZ,self.registratore.regis)
-                    self.registratore.scrivi()
-                l1 = self.is_moving(accX,accY,accZ)
-                '''if l0:
-                    moving = abs(l1 - l0)
-                    if moving > 0.5:
-                        movement = 'si muove'
-                    else:
-                        movement = 'è fermo'
-                    l0 = l1
-                    rotating = self.is_rotating(gyroX,gyroY,gyroZ)
-                    print(f'tactigon {movement} e {rotating}')
-                else:
-                    l0 = l1               
-                deltaT=0.02
-                if accX>0.1 or accX<0.1:
-                    velx=velx+accX*deltaT
-                if accY>0.1 or accY<0.1:
-                    vely=vely+accY*deltaT
-                if accZ>0.01 or accZ<-0.01:
-                    velz=velz+accZ*deltaT
-                print(velx,vely,velz) '''                  
-                       
-                    
-                
+
+                if self.down.is_set():
+                    self.registratore.movimento = 'down'
+
+                if self.left.is_set():
+                    self.registratore.movimento = 'left'
+
+                if self.right.is_set():
+                    self.registratore.movimento = 'right'
+
+                if self.forward.is_set():
+                    self.registratore.movimento = 'for'
+
+                if self.backward.is_set():
+                    self.registratore.movimento = 'back'
+
+
+                if self.registro.is_set():                    
+
+                    self.registratore.new_data(accX,accY,accZ,gyroX,gyroY,gyroZ,self.registratore.movimento)          
                 
                 
             if self.audio_rx.poll():
@@ -119,13 +113,8 @@ class ITSGesture(Process):
                     while self.audio_rx.poll(1):
                         audio_bytes = self.audio_rx.recv_bytes()
                         audio_file.writeframes(audio_bytes)
-            
-            '''if angolox0 & angoloy0 & angoloz0:
-                deltax = angolox0 - gyroX
-                if deltax < 1:
-                    print('non gira')
-                    else:
-                        print()'''
+
+        self.registratore.scrivi()
 
 
 
