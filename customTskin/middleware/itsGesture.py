@@ -52,7 +52,6 @@ class ITSGesture(Process):
         self.left = Event()
         self.forward = Event()
         self.backward = Event()
-        self.scrivi = Event()
         
         
     
