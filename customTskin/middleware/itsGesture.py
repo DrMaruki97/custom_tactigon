@@ -1,6 +1,9 @@
 from email.mime import audio
+from .models.randomForestModel import MovementClassifier
 from math import sqrt
+import numpy as np
 import wave
+import pickle
 from multiprocessing import Process, Event
 from multiprocessing.connection import _ConnectionBase
 import pandas as pd
@@ -27,7 +30,7 @@ class Tester():
 
     def scrivi(self):
         df = pd.DataFrame({'ax':self.x,'ay':self.y,'az':self.z,'gx':self.gx,'gy':self.gy,'gz':self.gz,'label':self.label})
-        df.to_csv(f'C:\\Users\\LucaGiovagnoli\\OneDrive - ITS Angelo Rizzoli\\Desktop\\Materiali\\UFS15\\Esercizi\\tactigon_pw\\testing.csv')
+        df.to_csv(r'C:\Users\LucaGiovagnoli\OneDrive - ITS Angelo Rizzoli\Desktop\Materiali\UFS15\Esercizi\tactigon_pw\custom_tactigon\movement_data\raw_data.csv')
         
 
         
@@ -35,15 +38,17 @@ class Tester():
 
 
 class ITSGesture(Process):
+    
     sensor_rx: _ConnectionBase
     audio_rx: _ConnectionBase
+    action_pipe: _ConnectionBase
 
-    def __init__(self, sensor_rx, audio_rx):
+    def __init__(self, sensor_rx, audio_rx, action_pipe):
         Process.__init__(self)
 
         self.sensor_rx = sensor_rx
         self.audio_rx = audio_rx
-
+        self.model = None
         self.can_run = Event()
         self.registratore = Tester()
         self.registro = Event()
@@ -52,10 +57,14 @@ class ITSGesture(Process):
         self.left = Event()
         self.forward = Event()
         self.backward = Event()
+        self.action_pipe = action_pipe
         
         
     
-    
+    def load_model(self,modelType):
+        with open(f'tactigon_pw\custom_tactigon\customTskin\middleware\models\{modelType}_model.pkl','rb') as f:
+            model = pickle.load(f)
+            self.model = model
         
     def is_moving(self, accX, accY, accZ):
         vector = accX**2 + accY**2 + accZ**2
@@ -67,14 +76,20 @@ class ITSGesture(Process):
         gyroy_base = 0.0
         gyroz_base = -0.0
 
-
-
         if gyroX != gyrox_base or gyroY != gyroy_base or gyroZ != gyroz_base:
             return 'gira'
         else:
             return 'non gira'
 
-    def run(self):        
+    def guess_movement(self,accX,accY,accZ,gyroX,gyroY,gyroZ):
+        data = np.array([accX,accY,accZ,gyroX,gyroY,gyroZ])
+        data.reshape(1, -1)
+        movement_type = self.model.predict(data)
+        return movement_type
+
+    def run(self):  
+
+        self.load_model('rf')      
         
         while self.can_run.is_set():
 
@@ -100,7 +115,9 @@ class ITSGesture(Process):
 
                 if self.registro.is_set():                    
 
-                    self.registratore.new_data(accX,accY,accZ,gyroX,gyroY,gyroZ,self.registratore.movimento)          
+                    self.registratore.new_data(accX,accY,accZ,gyroX,gyroY,gyroZ,self.registratore.movimento)
+                    action = self.guess_movement(accX,accY,accZ,gyroX,gyroY,gyroZ) 
+                    self.action_pipe.send(action)        
                 
                 
             if self.audio_rx.poll():
@@ -114,6 +131,3 @@ class ITSGesture(Process):
                         audio_file.writeframes(audio_bytes)
 
         self.registratore.scrivi()
-
-
-
