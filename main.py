@@ -1,11 +1,12 @@
 import time
 import pandas as pd
+from customTskin.middleware.models.randomForestModel import MovementClassifier
 from customTskin import CustomTskin, Hand, OneFingerGesture, TwoFingerGesture
 
 
 if __name__ == "__main__":
     # tskin = CustomTskin(....)
-    with CustomTskin("C0:83:3E:39:21:57", Hand.RIGHT) as tskin:
+    with CustomTskin("C0:83:41:39:21:57", Hand.RIGHT) as tskin:
         dati = tskin.middleware.registratore
         tocchi = 0
         movimento = 1
@@ -47,10 +48,10 @@ if __name__ == "__main__":
             if touch and touch.one_finger == OneFingerGesture.SINGLE_TAP:
                 print("registro.....")
                 tskin.middleware.registro.set()
-                time.sleep(2)
+                time.sleep(0.5)
                 tskin.middleware.registro.clear()
+                print(tskin.evaluate_move())
+                
                 print("ho finito")
 
             time.sleep(tskin.TICK)
-
-
