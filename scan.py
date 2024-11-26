@@ -1,13 +1,3 @@
-"""
-Scan/Discovery
---------------
-
-Example showing how to scan for BLE devices.
-
-Updated on 2019-03-25 by hbldh <henrik.blidh@nedomkull.com>
-
-"""
-
 import argparse
 import asyncio
 
