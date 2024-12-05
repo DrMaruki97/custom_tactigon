@@ -118,7 +118,7 @@ class MovementClassifier:
         probabilities = self.model.predict_proba(X_scaled)
         return prediction, probabilities
 
-    def save_model(self, model_path='movement_model.joblib', scaler_path='scaler.joblib', skl_path='movement_model.skl'):
+    def save_model(self, model_path='movement_model.joblib', scaler_path='scaler.joblib'):
         """Save the trained model and scaler to files."""
         if not self.is_trained:
             raise RuntimeError("Model must be trained before saving")
@@ -126,19 +126,6 @@ class MovementClassifier:
         # Save in .joblib
         dump(self.model, model_path)
         dump(self.scaler, scaler_path)
-
-        # Save in .skl format
-        skl_data = {'model': self.model, 'scaler': self.scaler}
-        dump(skl_data, skl_path)
-        print(f"Model saved in .joblib and .skl formats: {model_path}, {skl_path}")
-
-    def load_model_from_skl(self, skl_path='movement_model.skl'):
-        """Load the trained model and scaler from a .skl file."""
-        skl_data = load(skl_path)
-        self.model = skl_data['model']
-        self.scaler = skl_data['scaler']
-        self.is_trained = True
-        print(f"Model loaded from {skl_path}")
 
 
 # Main script
@@ -152,18 +139,12 @@ if __name__ == "__main__":
 
     # Train the model
     classifier.train(
-        data_path=r'C:\Users\GiacomoAmato\PycharmProjects\pythonProject1\venv\Scripts\IOT\dataset\tact_base_move.csv',
+        data_path=r'C:\Users\LucaGiovagnoli\OneDrive - ITS Angelo Rizzoli\Desktop\Materiali\UFS15\Esercizi\tactigon_pw\custom_tactigon\movement_data\tact_base_move.csv',
         verbose=True
     )
 
     # Save the model
     classifier.save_model(
-        model_path='movement_model.joblib',
-        scaler_path='scaler.joblib',
-        skl_path='movement_model.skl'
+        model_path=r'C:\Users\LucaGiovagnoli\OneDrive - ITS Angelo Rizzoli\Desktop\Materiali\UFS15\Esercizi\tactigon_pw\custom_tactigon\customTskin\middleware\models\movement_model.joblib',
+        scaler_path=r'C:\Users\LucaGiovagnoli\OneDrive - ITS Angelo Rizzoli\Desktop\Materiali\UFS15\Esercizi\tactigon_pw\custom_tactigon\customTskin\middleware\models\scaler.joblib'
     )
-
-    classifier.load_model_from_skl(skl_path='movement_model.skl')
-    new_data = pd.DataFrame({'ax': [0.1], 'ay': [-0.2], 'az': [0.3], 'gx': [0.4], 'gy': [-0.5], 'gz': [0.6]})
-    prediction, probabilities = classifier.predict(new_data)
-    print(f"Prediction: {prediction[0]}, Probabilities: {probabilities[0]}")

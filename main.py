@@ -6,7 +6,7 @@ from customTskin import CustomTskin, Hand, OneFingerGesture, TwoFingerGesture
 
 if __name__ == "__main__":
     # tskin = CustomTskin(....)
-    with CustomTskin("C0:83:41:39:21:57", Hand.RIGHT) as tskin:
+    with CustomTskin("C0:83:43:39:21:57", Hand.RIGHT,'rf') as tskin:
         dati = tskin.middleware.registratore
         tocchi = 0
         movimento = 1

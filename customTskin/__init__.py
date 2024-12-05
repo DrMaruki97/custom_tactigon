@@ -1,4 +1,5 @@
 import time
+from joblib import load
 from .utils import most_common
 from multiprocessing import Pipe
 from tactigon_gear import Ble, TSkinConfig, Hand, OneFingerGesture, TwoFingerGesture
@@ -8,15 +9,22 @@ from .middleware import ITSGesture
 class CustomTskin(Ble):
     middleware: ITSGesture
 
-    def __init__(self, address: str, hand: Hand):
+    def __init__(self, address: str, hand: Hand, modelType):
         Ble.__init__(self, address, hand)
 
         sensor_rx, self._sensor_tx = Pipe(duplex=False)
         audio_rx, self._audio_tx = Pipe(duplex=False)
         self._action_pipe, action_pipe = Pipe(duplex=False)
 
-        self.middleware = ITSGesture(sensor_rx, audio_rx,action_pipe)
+        model = self.load_model(modelType)
+
+        self.middleware = ITSGesture(sensor_rx, audio_rx,action_pipe,model)
         self.middleware.can_run.set()
+
+    def load_model(self,modelType):
+    
+        model = load(f'tactigon_pw\custom_tactigon\customTskin\middleware\models\{modelType}_model.joblib')
+        return model
 
     def start(self):
         self.middleware.start()

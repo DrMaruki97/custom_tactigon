@@ -1,12 +1,12 @@
+import pandas as pd
+import numpy as np
+import wave
+from joblib import load
 from email.mime import audio
 from .models.randomForestModel import MovementClassifier
 from math import sqrt
-import numpy as np
-import wave
-import pickle
 from multiprocessing import Process, Event
 from multiprocessing.connection import _ConnectionBase
-import pandas as pd
 
 class Tester():
     def __init__(self) -> None:
@@ -42,13 +42,14 @@ class ITSGesture(Process):
     sensor_rx: _ConnectionBase
     audio_rx: _ConnectionBase
     action_pipe: _ConnectionBase
+    model : MovementClassifier
 
-    def __init__(self, sensor_rx, audio_rx, action_pipe):
+    def __init__(self, sensor_rx, audio_rx, action_pipe,model):
         Process.__init__(self)
 
         self.sensor_rx = sensor_rx
         self.audio_rx = audio_rx
-        self.model = None
+        self.model = model
         self.can_run = Event()
         self.registratore = Tester()
         self.registro = Event()
@@ -58,18 +59,11 @@ class ITSGesture(Process):
         self.forward = Event()
         self.backward = Event()
         self.action_pipe = action_pipe
-        
-        
     
-    def load_model(self,modelType):
-        with open(f'tactigon_pw\custom_tactigon\customTskin\middleware\models\{modelType}_model.pkl','rb') as f:
-            model = pickle.load(f)
-            self.model = model
-        
-    def is_moving(self, accX, accY, accZ):
+    def acc_vector(self, accX, accY, accZ):
         vector = accX**2 + accY**2 + accZ**2
-        l =  sqrt(vector)
-        return l
+        module =  sqrt(vector)
+        return module
     
     def is_rotating(self,gyroX,gyroY,gyroZ):
         gyrox_base = 0.1
@@ -82,14 +76,11 @@ class ITSGesture(Process):
             return 'non gira'
 
     def guess_movement(self,accX,accY,accZ,gyroX,gyroY,gyroZ):
-        data = np.array([accX,accY,accZ,gyroX,gyroY,gyroZ])
-        data.reshape(1, -1)
+        data = pd.DataFrame({'accX':accX,'accY':accY,'accZ':accZ,'gyroX':gyroX,'gyroY':gyroY,'gyroZ':gyroZ},index=[0])
         movement_type = self.model.predict(data)
         return movement_type
 
-    def run(self):  
-
-        self.load_model('rf')      
+    def run(self): 
         
         while self.can_run.is_set():
 
