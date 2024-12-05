@@ -7,6 +7,11 @@ from .models.randomForestModel import MovementClassifier
 from math import sqrt
 from multiprocessing import Process, Event
 from multiprocessing.connection import _ConnectionBase
+import warnings
+from sklearn.exceptions import DataConversionWarning
+
+warnings.filterwarnings(action='ignore', category=DataConversionWarning)
+
 
 class Tester():
     def __init__(self) -> None:
@@ -59,6 +64,9 @@ class ITSGesture(Process):
         self.forward = Event()
         self.backward = Event()
         self.action_pipe = action_pipe
+        self.buffer = []
+        self.predict_data = []
+        self.can_predict = False
     
     def acc_vector(self, accX, accY, accZ):
         vector = accX**2 + accY**2 + accZ**2
@@ -75,12 +83,28 @@ class ITSGesture(Process):
         else:
             return 'non gira'
 
-    def guess_movement(self,accX,accY,accZ,gyroX,gyroY,gyroZ):
-        data = pd.DataFrame({'accX':accX,'accY':accY,'accZ':accZ,'gyroX':gyroX,'gyroY':gyroY,'gyroZ':gyroZ},index=[0])
+    def guess_movement(self):
+        data = pd.DataFrame(self.buffer)
+        data = data.transpose()
         movement_type = self.model.predict(data)
         return movement_type
+    
+    def get_gesture(self,accX,accY,accZ,gyroX,gyroY,gyroZ):
+        if len(self.buffer) <= 100:
+            self.buffer.append(accX,accY,accZ,gyroX,gyroY,gyroZ)
+        else:
+            self.can_predict = True
+            self.predict_data = self.buffer
+            self.buffer.clear()
 
     def run(self): 
+
+        accX = []
+        accY = []
+        accZ = []
+        gyroX = []
+        gyroY = [] 
+        gyroZ = []
         
         while self.can_run.is_set():
 
@@ -106,9 +130,17 @@ class ITSGesture(Process):
 
                 if self.registro.is_set():                    
 
-                    self.registratore.new_data(accX,accY,accZ,gyroX,gyroY,gyroZ,self.registratore.movimento)
-                    action = self.guess_movement(accX,accY,accZ,gyroX,gyroY,gyroZ) 
-                    self.action_pipe.send(action)        
+                    #self.registratore.new_data(accX,accY,accZ,gyroX,gyroY,gyroZ,self.registratore.movimento)
+                    self.get_gesture(accX,accY,accZ,gyroX,gyroY,gyroZ)
+
+                    if self.can_predict:
+                        action = self.guess_movement()
+                        self.action_pipe.send(action)
+                        self.can_predict = False
+                        self.predict_data.clear()
+                else:
+                    if self.buffer:
+                        self.buffer.clear()        
                 
                 
             if self.audio_rx.poll():
@@ -121,4 +153,4 @@ class ITSGesture(Process):
                         audio_bytes = self.audio_rx.recv_bytes()
                         audio_file.writeframes(audio_bytes)
 
-        self.registratore.scrivi()
+        #self.registratore.scrivi()

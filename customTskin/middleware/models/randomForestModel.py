@@ -139,7 +139,7 @@ if __name__ == "__main__":
 
     # Train the model
     classifier.train(
-        data_path=r'C:\Users\LucaGiovagnoli\OneDrive - ITS Angelo Rizzoli\Desktop\Materiali\UFS15\Esercizi\tactigon_pw\custom_tactigon\movement_data\tact_base_move.csv',
+        data_path=r'C:\Users\LucaGiovagnoli\OneDrive - ITS Angelo Rizzoli\Desktop\Materiali\UFS15\Esercizi\tactigon_pw\custom_tactigon\movement_data\finaldf.csv',
         verbose=True
     )
 

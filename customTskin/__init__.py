@@ -36,8 +36,6 @@ class CustomTskin(Ble):
         self.middleware.join(timeout)
 
     def evaluate_move(self):
-        action = []
-        while self._action_pipe.poll(timeout=0.02):
-            action.append(self._action_pipe.recv())
-        return most_common(action)
+        action = self._action_pipe.recv()
+        return action
         
