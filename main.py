@@ -55,7 +55,7 @@ if __name__ == "__main__":
                 time.sleep(2)
                 tskin.select_sensors()
                 print('Fine registrazione, ora capisco...')
-                action = tskin.broca(path=r'C:\Users\LucaGiovagnoli\OneDrive - ITS Angelo Rizzoli\Desktop\Materiali\UFS15\Esercizi\tactigon_pw\custom_tactigon\audio_data\test_data.wav',model = 'base')
+                action = tskin.wernicke(path=r'C:\Users\LucaGiovagnoli\OneDrive - ITS Angelo Rizzoli\Desktop\Materiali\UFS15\Esercizi\tactigon_pw\custom_tactigon\audio_data\test_data.wav',model = 'base')
                 print(action)
 
                 

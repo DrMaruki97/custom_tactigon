@@ -43,7 +43,7 @@ class CustomTskin(Ble):
         action = self._action_pipe.recv()
         return action
     
-    def broca(self,path,model):
+    def wernicke(self,path,model):
         modello = whisper.load_model(model)
         risultato = modello.transcribe(path,language='italian')
         testo = risultato['text']
