@@ -19,7 +19,7 @@ if __name__ == "__main__":
 
             touch = tskin.touch
 
-            if touch and touch.two_finger == TwoFingerGesture.TWO_FINGER_TAP:
+            if touch and touch.one_finger == OneFingerGesture.TAP_AND_HOLD:
                 tskin.join()
                 break
 
@@ -56,8 +56,8 @@ if __name__ == "__main__":
                 action = tskin.broca(path=r'C:\Users\LucaGiovagnoli\OneDrive - ITS Angelo Rizzoli\Desktop\Materiali\UFS15\Esercizi\tactigon_pw\custom_tactigon\audio_data\test_data.wav',model = 'tiny')
                 print(action)
 
-                '''
-                if touch and touch.one_finger == OneFingerGesture.SINGLE_TAP:
+                
+            if touch and touch.two_finger == TwoFingerGesture.TWO_FINGER_TAP:
                 print("registro.....")
                 tskin.middleware.registro.set()
                 time.sleep(0.5)
@@ -66,4 +66,4 @@ if __name__ == "__main__":
                 
                 print("ho finito")
 
-            time.sleep(tskin.TICK)'''
+            time.sleep(tskin.TICK)
