@@ -42,7 +42,7 @@ class MovementClassifier:
             print(df[df.columns[-1]].value_counts())
 
         # Separate features and labels
-        X = df[df.columns[:-1]]
+        X = df[df.columns[1:-1]]
         y = df[df.columns[-1]]
 
         self.classes_ = np.unique(y)
@@ -143,6 +143,6 @@ if __name__ == "__main__":
 
     # Save the model
     classifier.save_model(
-        model_path=r'C:\Users\LucaGiovagnoli\OneDrive - ITS Angelo Rizzoli\Desktop\Materiali\UFS15\Esercizi\tactigon_pw\custom_tactigon\customTskin\middleware\models\movement_model.joblib',
+        model_path=r'C:\Users\LucaGiovagnoli\OneDrive - ITS Angelo Rizzoli\Desktop\Materiali\UFS15\Esercizi\tactigon_pw\custom_tactigon\customTskin\middleware\models\rf_model.joblib',
         scaler_path=r'C:\Users\LucaGiovagnoli\OneDrive - ITS Angelo Rizzoli\Desktop\Materiali\UFS15\Esercizi\tactigon_pw\custom_tactigon\customTskin\middleware\models\scaler.joblib'
     )

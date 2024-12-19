@@ -63,10 +63,11 @@ class ITSGesture(Process):
         self.left = Event()
         self.forward = Event()
         self.backward = Event()
+        self.predicted = Event()
         self.action_pipe = action_pipe
         self.buffer = []
         self.predict_data = []
-        self.can_predict = False
+        self.can_predict = Event()
     
     def acc_vector(self, accX, accY, accZ):
         vector = accX**2 + accY**2 + accZ**2
@@ -90,17 +91,12 @@ class ITSGesture(Process):
         return movement_type
     
     def get_gesture(self,accX,accY,accZ,gyroX,gyroY,gyroZ):
-        if len(self.buffer) <= 100:
-            self.buffer.append(accX)
-            self.buffer.append(accY)
-            self.buffer.append(accZ)
-            self.buffer.append(gyroX)
-            self.buffer.append(gyroY)
-            self.buffer.append(gyroZ)
+        if len(self.buffer) <= 594:
+
+            self.buffer.extend([accX,accY,accZ,gyroX,gyroY,gyroZ])
+
         else:
-            self.can_predict = True
-            self.predict_data = self.buffer
-            self.buffer.clear()
+            self.can_predict.set()
 
     def run(self): 
 
@@ -138,11 +134,16 @@ class ITSGesture(Process):
                     #self.registratore.new_data(accX,accY,accZ,gyroX,gyroY,gyroZ,self.registratore.movimento)
                     self.get_gesture(accX,accY,accZ,gyroX,gyroY,gyroZ)
 
-                    if self.can_predict:
+                    if self.can_predict.is_set():
+
                         action = self.guess_movement()
-                        self.action_pipe.send(action)
-                        self.can_predict = False
+                        self.predicted.set()
+                        
+                        while self.predicted.is_set():
+                            self.action_pipe.send(action)
+                        self.can_predict.clear()
                         self.predict_data.clear()
+
                 else:
                     if self.buffer:
                         self.buffer.clear()        

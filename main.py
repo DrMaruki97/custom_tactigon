@@ -62,10 +62,10 @@ if __name__ == "__main__":
             if touch and touch.two_finger == TwoFingerGesture.TWO_FINGER_TAP:
                 print("registro.....")
                 tskin.middleware.registro.set()
-                time.sleep(0.5)
+                while not tskin.middleware.can_predict.is_set():
+                    print("Registrando")
                 tskin.middleware.registro.clear()
+                print('cleared')
                 print(tskin.evaluate_move())
-                
-                print("ho finito")
 
             time.sleep(tskin.TICK)

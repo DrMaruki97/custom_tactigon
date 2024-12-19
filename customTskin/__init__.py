@@ -1,6 +1,5 @@
 import time
 from joblib import load
-from .utils import most_common
 from multiprocessing import Pipe
 from tactigon_gear import Ble, TSkinConfig, Hand, OneFingerGesture, TwoFingerGesture
 from typing import Optional
@@ -40,8 +39,11 @@ class CustomTskin(Ble):
         self.middleware.join(timeout)
 
     def evaluate_move(self):
-        action = self._action_pipe.recv()
-        return action
+        while True:
+            action = self._action_pipe.recv()
+            if action:
+                self.middleware.predicted.clear()
+                return action[0]
     
     def wernicke(self,path,model):
         modello = whisper.load_model(model)
