@@ -22,9 +22,8 @@ class MovementClassifier:
         self.classes_ = None
 
     def preprocess_data(self, X):
-        expected_columns = ['ax', 'ay', 'az', 'gx', 'gy', 'gz']
         if isinstance(X, pd.DataFrame):
-            X = X[expected_columns].values
+            X = X.values
         return X
 
     def train(self, data_path, n_splits=5, verbose=True):
@@ -40,11 +39,11 @@ class MovementClassifier:
         # Class distribution
         if verbose:
             print("\nClass distribution:")
-            print(df['label'].value_counts())
+            print(df[df.columns[-1]].value_counts())
 
         # Separate features and labels
-        X = df[['ax', 'ay', 'az', 'gx', 'gy', 'gz']]
-        y = df['label']
+        X = df[df.columns[:-1]]
+        y = df[df.columns[-1]]
 
         self.classes_ = np.unique(y)
 
@@ -115,10 +114,9 @@ class MovementClassifier:
         X = self.preprocess_data(features)
         X_scaled = self.scaler.transform(X)
         prediction = self.model.predict(X_scaled)
-        probabilities = self.model.predict_proba(X_scaled)
-        return prediction, probabilities
+        return prediction
 
-    def save_model(self, model_path='movement_model.joblib', scaler_path='scaler.joblib'):
+    def save_model(self, model_path='rf_model.joblib', scaler_path='scaler.joblib'):
         """Save the trained model and scaler to files."""
         if not self.is_trained:
             raise RuntimeError("Model must be trained before saving")
