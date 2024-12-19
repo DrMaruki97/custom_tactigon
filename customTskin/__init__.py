@@ -6,6 +6,9 @@ from tactigon_gear import Ble, TSkinConfig, Hand, OneFingerGesture, TwoFingerGes
 from typing import Optional
 from .middleware import ITSGesture
 import whisper
+import warnings
+
+warnings.filterwarnings("ignore")
 
 class CustomTskin(Ble):
     middleware: ITSGesture

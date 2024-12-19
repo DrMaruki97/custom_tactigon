@@ -7,7 +7,7 @@ import whisper
 
 if __name__ == "__main__":
     # tskin = CustomTskin(....)
-    with CustomTskin("C0:83:35:39:21:57", Hand.RIGHT,'rf') as tskin:
+    with CustomTskin("C0:83:43:39:21:57", Hand.RIGHT,'rf') as tskin:
         dati = tskin.middleware.registratore
         tocchi = 0
         movimento = 1
@@ -20,6 +20,7 @@ if __name__ == "__main__":
             touch = tskin.touch
 
             if touch and touch.one_finger == OneFingerGesture.TAP_AND_HOLD:
+                print('Spegnimento...')
                 tskin.join()
                 break
 
@@ -53,7 +54,8 @@ if __name__ == "__main__":
                 tskin.select_audio()
                 time.sleep(2)
                 tskin.select_sensors()
-                action = tskin.broca(path=r'C:\Users\LucaGiovagnoli\OneDrive - ITS Angelo Rizzoli\Desktop\Materiali\UFS15\Esercizi\tactigon_pw\custom_tactigon\audio_data\test_data.wav',model = 'tiny')
+                print('Fine registrazione, ora capisco...')
+                action = tskin.broca(path=r'C:\Users\LucaGiovagnoli\OneDrive - ITS Angelo Rizzoli\Desktop\Materiali\UFS15\Esercizi\tactigon_pw\custom_tactigon\audio_data\test_data.wav',model = 'base')
                 print(action)
 
                 
