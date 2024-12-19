@@ -58,6 +58,7 @@ class ITSGesture(Process):
         self.can_run = Event()
         self.registratore = Tester()
         self.registro = Event()
+        self.scrivo = Event()
         self.down = Event()
         self.right = Event()
         self.left = Event()
@@ -132,6 +133,7 @@ class ITSGesture(Process):
                 if self.registro.is_set():                    
 
                     #self.registratore.new_data(accX,accY,accZ,gyroX,gyroY,gyroZ,self.registratore.movimento)
+                    
                     self.get_gesture(accX,accY,accZ,gyroX,gyroY,gyroZ)
 
                     if self.can_predict.is_set():
@@ -146,7 +148,11 @@ class ITSGesture(Process):
 
                 else:
                     if self.buffer:
-                        self.buffer.clear()        
+                        self.buffer.clear()
+
+                '''elif self.scrivo.is_set():
+                    self.registratore.scrivi()
+                    self.scrivo.clear()'''
                 
                 
             if self.audio_rx.poll():
