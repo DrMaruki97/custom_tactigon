@@ -91,7 +91,12 @@ class ITSGesture(Process):
     
     def get_gesture(self,accX,accY,accZ,gyroX,gyroY,gyroZ):
         if len(self.buffer) <= 100:
-            self.buffer.append(accX,accY,accZ,gyroX,gyroY,gyroZ)
+            self.buffer.append(accX)
+            self.buffer.append(accY)
+            self.buffer.append(accZ)
+            self.buffer.append(gyroX)
+            self.buffer.append(gyroY)
+            self.buffer.append(gyroZ)
         else:
             self.can_predict = True
             self.predict_data = self.buffer
@@ -144,7 +149,7 @@ class ITSGesture(Process):
                 
                 
             if self.audio_rx.poll():
-                with wave.open("test.wav", "wb") as audio_file:
+                with wave.open(r'C:\Users\LucaGiovagnoli\OneDrive - ITS Angelo Rizzoli\Desktop\Materiali\UFS15\Esercizi\tactigon_pw\custom_tactigon\audio_data\test_data.wav', "wb") as audio_file:
                     audio_file.setnchannels(1)
                     audio_file.setframerate(16000)
                     audio_file.setsampwidth(2)

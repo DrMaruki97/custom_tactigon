@@ -5,6 +5,7 @@ from multiprocessing import Pipe
 from tactigon_gear import Ble, TSkinConfig, Hand, OneFingerGesture, TwoFingerGesture
 from typing import Optional
 from .middleware import ITSGesture
+import whisper
 
 class CustomTskin(Ble):
     middleware: ITSGesture
@@ -16,12 +17,12 @@ class CustomTskin(Ble):
         audio_rx, self._audio_tx = Pipe(duplex=False)
         self._action_pipe, action_pipe = Pipe(duplex=False)
 
-        model = self.load_model(modelType)
+        model = self.get_model(modelType)
 
         self.middleware = ITSGesture(sensor_rx, audio_rx,action_pipe,model)
         self.middleware.can_run.set()
 
-    def load_model(self,modelType):
+    def get_model(self,modelType):
     
         model = load(f'tactigon_pw\custom_tactigon\customTskin\middleware\models\{modelType}_model.joblib')
         return model
@@ -38,4 +39,11 @@ class CustomTskin(Ble):
     def evaluate_move(self):
         action = self._action_pipe.recv()
         return action
+    
+    def broca(self,path,model):
+        modello = whisper.load_model(model)
+        risultato = modello.transcribe(path,language='italian')
+        testo = risultato['text']
+        return testo
+
         
